@@ -32,6 +32,23 @@ csv.fromPath("data2.csv")
  })
  .on("end", function(){
     let corrCount = 0, wrongCount = 0;
+    attrDist=[];
+    training[0].forEach((k,i)=>{
+        attrDist[i]=[...new Set(training.map(item => item[i]))];
+    })
+    classAttrDist={};
+    Object.keys(classDist).forEach((key)=>{
+        classAttrDist[key]=[];
+    });
+    Object.keys(classDist).forEach((k)=>{
+        attrDist.forEach((a,j)=>{
+            classAttrDist[k][j]={};
+            a.forEach((l)=>{
+                classAttrDist[k][j][l]=countAttr(training,j,l,k);
+            })
+        })
+    })
+    console.log(classAttrDist);
     testing.forEach((d,i)=>{
         let probability={};
         classNames=Array.from(classNames);
@@ -41,7 +58,7 @@ csv.fromPath("data2.csv")
         d.forEach((cell, i)=>{
             classNames.forEach((classn)=>{
                 if(i !== d.length - 1 ){
-                    probability[classn] *= countAttr(training, i, cell, classn);
+                    probability[classn] *= classAttrDist[classn][i][cell]
                     probability[classn] /= classDist[classn];
                 }
             })
@@ -71,9 +88,9 @@ csv.fromPath("data2.csv")
         }else{
             wrongCount+=1;
         }
-        console.log('\033[2J');
+        // console.log('\033[2J');
 
-        console.log("Progress: ", (((i+1)/testing.length) * 100).toFixed(2), "%");
+        // console.log("Progress: ", (((i+1)/testing.length) * 100).toFixed(2), "%");
 
     })
     console.log("Accuracy: ", (100*corrCount/testing.length).toFixed(2),"%");
